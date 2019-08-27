@@ -1,11 +1,13 @@
 package com.registration.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.registration.utils.Validator;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.Objects;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
 
     @NotNull(message = Validator.USERNAME_IS_MANDATORY)
@@ -13,8 +15,7 @@ public class User {
     private String username;
 
     @NotNull(message = Validator.PASSWORD_IS_MANDATORY)
-    @Pattern(regexp=Validator.PASSWORD_PATTERN,
-            message = Validator.PASSWORD_FORMAT_ERROR)
+    @Pattern(regexp=Validator.PASSWORD_PATTERN, message = Validator.PASSWORD_FORMAT_ERROR)
     private String password;
 
     @NotNull(message = Validator.DATE_OF_BIRTH_IS_MANDATORY)

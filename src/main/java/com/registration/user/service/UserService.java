@@ -7,5 +7,6 @@ interface UserService {
     // register a new user
     User register(User user);
 
+    boolean validateUserExists(User user);
 
 }

@@ -2,34 +2,48 @@ package com.registration.user.controller;
 
 import com.registration.user.domain.User;
 import com.registration.user.service.UserServiceImpl;
+import com.registration.user.service.exclusion.ExclusionServiceImpl;
+import com.registration.utils.BadRequestException;
+import com.registration.utils.Validator;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// http://localhost:8080/register?username=ferin&password=Abc123mm&dateOfBirth=1988-02-03&socialSecurityNumber=1234567898777
-// http://localhost:8080/register?username=adaLovelace&password=Analytical3ngineRulz&dateOfBirth=10th%20December%201815&socialSecurityNumber=85385075
+import javax.validation.Valid;
+
+
+/*
+*
+* {
+"username": "adaLovelace",
+"password": "Analytical3ngineRulz",
+"dateOfBirth": "1815-12-10",
+"socialSecurityNumber": "85385075"
+}
+*
+* */
 
 @RestController
 public class UserController {
 
     private UserServiceImpl userService;
+    private ExclusionServiceImpl exclusionService;
 
-    public UserController(UserServiceImpl userService) {
+    public UserController(UserServiceImpl userService, ExclusionServiceImpl exclusionService) {
         this.userService = userService;
+        this.exclusionService = exclusionService;
     }
 
     @RequestMapping("/register")
-    public User register(@RequestParam(value="username") String username,
-                         @RequestParam(value="password") String password,
-                         @RequestParam(value="dateOfBirth") String dateOfBirth,
-                         @RequestParam(value="socialSecurityNumber") String socialSecurityNumber) {
+    public User register(@Valid @RequestBody final User user) {
 
-        User user = new User();
+        if(!exclusionService.validate(user.getDateOfBirth(), user.getSocialSecurityNumber())) {
+            throw new BadRequestException(Validator.USER_EXCLUDED);
+        }
 
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setDateOfBirth(dateOfBirth);
-        user.setSocialSecurityNumber(socialSecurityNumber);
+        if(userService.validateUserExists(user)) {
+            throw new BadRequestException(Validator.USER_ALREADY_REGISTERED);
+        }
 
         return userService.register(user);
     }
