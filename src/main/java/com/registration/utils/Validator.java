@@ -10,7 +10,7 @@ public class Validator {
     public static final String SSN_IS_MANDATORY = "SSN is mandatory";
 
     public static final String SSN_PATTERN = "^[0-9]{8,9}$";
-    public static final String DATE_OF_BIRTH_PATTERN = "^(18|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])$";
+    public static final String DATE_OF_BIRTH_PATTERN = "^(18|19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])$";
     public static final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*\\d)(.){4,40}$";
     public static final String USERNAME_PATTERN = "^[a-zA-Z0-9]{1,40}$";
 

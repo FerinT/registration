@@ -1,10 +1,9 @@
 package com.registration.user.controller;
 
+import com.google.gson.Gson;
 import com.registration.user.domain.User;
 import com.registration.user.service.UserServiceImpl;
 import com.registration.user.service.exclusion.ExclusionServiceImpl;
-import com.registration.utils.BadRequestException;
-import com.registration.utils.Validator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,7 +34,6 @@ public class UserControllerTest {
     @MockBean
     private ExclusionServiceImpl exclusionService;
 
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -44,15 +42,24 @@ public class UserControllerTest {
     public void registerNewUser() throws Exception{
 
         User user = new User();
-        user.setUsername("janedoe");
-        user.setSocialSecurityNumber("111-22-0467");
-        user.setPassword("P@55worD");
-        user.setDateOfBirth("1994-03-30");
+        user.setUsername("adaLovelace");
+        user.setSocialSecurityNumber("85385078");
+        user.setPassword("Analytical3ngineRulz");
+        user.setDateOfBirth("1916-12-10");
+
+        Mockito.doReturn(Boolean.TRUE).when(exclusionService).validate((Mockito.matches(user.getDateOfBirth())),
+                (Mockito.matches(user.getSocialSecurityNumber())));
+        Mockito.doReturn(Boolean.FALSE).when(userService).validateUserExists((user));
+
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
 
         given(userService.register(user)).willReturn(user);
 
-        mvc.perform(post("/register?username=janedoe&password=P@55worD&dateOfBirth=1994-03-30&socialSecurityNumber=786-45-1245")
-                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"))
                 .andExpect(status().isOk());
     }
 
@@ -64,10 +71,15 @@ public class UserControllerTest {
         user.setPassword("P@55worD");
         user.setDateOfBirth("1994-03-30");
 
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+
         given(userService.register(user)).willReturn(user);
 
-        mvc.perform(post("/register?username=jane doe&password=P@55worD&dateOfBirth=1994-03-30&socialSecurityNumber=786-45-1245")
-                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"))
                 .andExpect(status().isBadRequest());
 
     }
@@ -81,28 +93,41 @@ public class UserControllerTest {
         user.setPassword("P@55worD");
         user.setDateOfBirth("1994");
 
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+
         given(userService.register(user)).willReturn(user);
 
-        mvc.perform(post("/register?username=jane&password=P@55worD&dateOfBirth=1990&socialSecurityNumber=853850")
-                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void validateExclusionList() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(Validator.USER_EXCLUDED);
-
+    public void validateExclusionList() throws Exception{
         User user = new User();
         user.setUsername("adaLovelace");
         user.setPassword("Analytical3ngineRulz");
         user.setDateOfBirth("1815-12-10");
         user.setSocialSecurityNumber("85385075");
 
-        Mockito.doReturn(Boolean.FALSE).when(exclusionService).validate((user.getDateOfBirth()),
-                (user.getSocialSecurityNumber()));
 
-        userService.register(user);
+        Mockito.doReturn(Boolean.FALSE).when(exclusionService).validate((Mockito.matches(user.getDateOfBirth())),
+                (Mockito.matches(user.getSocialSecurityNumber())));
+        Mockito.doReturn(Boolean.FALSE).when(userService).validateUserExists((user));
+
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+
+        given(userService.register(user)).willReturn(user);
+
+        mvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isBadRequest());
      }
 
 }
